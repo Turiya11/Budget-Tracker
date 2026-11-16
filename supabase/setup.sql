@@ -5,6 +5,7 @@
 -- How it's protected: the tables are closed to the public API key (row level security,
 -- no policies). The only way in is through the functions below, and every one of them
 -- checks the device secret that the app generates and stores only as a SHA-256 hash.
+-- One-time codes (OTPs) and texts that aren't completed payments are dropped without being saved.
 
 create table if not exists public.bt_config (
   id int primary key default 1 check (id = 1),
@@ -31,6 +32,9 @@ create table if not exists public.bt_snapshot (
   data jsonb not null,
   updated_at timestamptz not null default now()
 );
+
+-- Older versions kept skipped texts (including OTPs) until the app synced. Clear them out.
+delete from public.bt_inbox where ignored;
 
 alter table public.bt_config enable row level security;
 alter table public.bt_inbox enable row level security;
@@ -99,6 +103,7 @@ declare
   v_d int; v_c int;
   v_debit boolean;
   v_ignored boolean;
+  v_otp boolean;
   v_sum jsonb;
   v_has_sum boolean;
   v_month text;
@@ -123,10 +128,19 @@ begin
     return jsonb_build_object('ok', true, 'duplicate', true, 'title', '', 'body', '');
   end if;
 
-  v_ignored := v_low ~ '(\motp\M|one[- ]time password|will be debited|to be debited|is due|due on|\mrequested\M|collect request|\mfailed\M|declined|unsuccessful|insufficient)';
+  -- A one-time code: "123456 is your OTP", "OTP is 123456", or any OTP text that doesn't
+  -- report a finished payment. (Real debit alerts often end with "never share your OTP".)
+  v_otp := v_low ~ '(\m\d{4,8}\s+is\s+(your|the)\s+(otp|one[- ]time password|verification code|secure code)|(\motp\M|one[- ]time password|verification code)\s*(is|:|-)?\s*\d{4,8}\M)'
+    or (v_low ~ '(\motp\M|one[- ]time password|verification code|secure code|passcode)'
+        and v_low !~ '(debited|credited|\msent\M|\mspent\M|\mpaid\M|withdrawn|deducted|\mreceived\M)');
+  v_ignored := v_otp or v_low ~ '(will be debited|to be debited|to be paid|is due|due on|\mrequested\M|collect request|\mfailed\M|declined|unsuccessful|insufficient)';
   v_d := regexp_instr(v_low, '(debited|\msent\M|\mspent\M|\mpaid\M|withdrawn|withdrawal|purchase|deducted)');
   v_c := regexp_instr(v_low, '(credited|\mreceived\M|deposited|refund|reversed|reversal|cashback)');
   if v_d = 0 and v_c = 0 then v_ignored := true; end if;
+  -- Not a completed payment: drop it here. Nothing is saved.
+  if v_ignored then
+    return jsonb_build_object('ok', true, 'ignored', true, 'title', '', 'body', '');
+  end if;
   v_debit := v_d > 0 and (v_c = 0 or v_d <= v_c);
 
   v_amount := nullif(replace(substring(v_low from '(?:rs\.?|inr|₹)\s*:?\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)'), ',', ''), '')::numeric;
@@ -162,12 +176,9 @@ begin
 
   if not p_dry_run then
     insert into bt_inbox (body, sender, body_hash, amount, is_debit, category, in_budget, ignored)
-    values (v_body, left(p_sender, 64), v_hash, v_amount, v_debit, v_cat, v_in_budget, v_ignored);
+    values (v_body, left(p_sender, 64), v_hash, v_amount, v_debit, v_cat, v_in_budget, false);
   end if;
 
-  if v_ignored then
-    return jsonb_build_object('ok', true, 'ignored', true, 'title', '', 'body', '');
-  end if;
   if v_amount is null then
     return jsonb_build_object('ok', true, 'title', 'Bank SMS saved', 'body', 'Open Budget Tracker to review it.');
   end if;

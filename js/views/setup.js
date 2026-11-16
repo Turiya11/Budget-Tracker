@@ -52,7 +52,7 @@ export default {
           <span>${bubble("bell", "mint")}<small>You get a budget notification</small></span>${icon("chevR")}
           <span>${bubble("wallet", "sky")}<small>App adds it when opened</small></span>
         </div>
-        <p class="hint">The database is your own free Supabase project. Only this app and your Shortcut hold the key and secret to it.</p>
+        <p class="hint">The database is your own free Supabase project. Only this app and your Shortcut hold the key and secret to it, so never share the Shortcut. OTP texts and anything that isn't a finished payment are thrown away without being saved.</p>
       </section>
 
       <ol class="steps">

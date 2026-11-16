@@ -9,7 +9,18 @@ const AMOUNT_BARE_RE = /(?:debited|credited)\s+(?:by|with|for)\s+([0-9][0-9,]*(?
 
 const DEBIT_RE = /\b(debited|debit(?:ed)? for|sent|spent|paid|withdrawn|withdrawal|purchase[d]?|txn of|transferred|deducted)\b/i;
 const CREDIT_RE = /\b(credited|received|deposited|refund(?:ed)?|reversed|reversal|cashback)\b/i;
-const IGNORE_RE = /\b(otp|one[- ]time password|verification code|will be debited|to be debited|is due|due on|due date|amount due|requested|collect request|failed|declined|unsuccessful|insufficient|mandate (?:created|registered|set ?up)|autopay (?:set|registered|setup)|e-?mandate)\b/i;
+const IGNORE_RE = /\b(will be debited|to be debited|to be paid|is due|due on|due date|amount due|requested|collect request|failed|declined|unsuccessful|insufficient|mandate (?:created|registered|set ?up)|autopay (?:set|registered|setup)|e-?mandate)\b/i;
+
+// One-time codes. Real debit alerts often end with "never share your OTP", so a mention of OTP
+// only counts when the text has a code in it or doesn't report a finished payment.
+const OTP_CODE_RE = /\b\d{4,8}\s+is\s+(?:your|the)\s+(?:otp|one[- ]time password|verification code|secure code)\b|\b(?:otp|one[- ]time password|verification code)\s*(?:is|:|-)?\s*\d{4,8}\b/i;
+const OTP_WORD_RE = /\b(?:otp|one[- ]time password|verification code|secure code|passcode)\b/i;
+const DONE_RE = /\b(?:debited|credited|sent|spent|paid|withdrawn|deducted|received)\b/i;
+
+export function isOtp(text) {
+  const s = String(text || "");
+  return OTP_CODE_RE.test(s) || (OTP_WORD_RE.test(s) && !DONE_RE.test(s));
+}
 
 const BANKS = [
   ["HDFC", /hdfc/i], ["ICICI", /icici/i], ["SBI", /\bsbi\b|state bank/i], ["Axis", /axis/i],
@@ -91,6 +102,7 @@ function pickAmount(text) {
 export function parseSms(text, meta = {}) {
   const body = String(text || "").replace(/\r/g, "").trim();
   if (!body) return { ok: false, reason: "empty" };
+  if (isOtp(body)) return { ok: false, reason: "one-time code (OTP)" };
   if (IGNORE_RE.test(body)) return { ok: false, reason: "not a completed transaction" };
 
   const d = firstIndex(DEBIT_RE, body);

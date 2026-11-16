@@ -56,7 +56,7 @@ export default {
       ${state.skipped.length ? `<details class="acc">
         <summary>${bubble("sms", "grey")}<span class="acc-t">Skipped messages</span><span class="count num">${state.skipped.length}</span><span class="chev">${icon("chevD")}</span></summary>
         <div class="acc-body">
-          <p class="hint">Captured SMS that weren't payments (OTPs, reminders) or couldn't be read. If one was a real payment, add it from the Add tab.</p>
+          <p class="hint">Captured SMS the app couldn't read as a payment. OTP texts are never saved. If one was a real payment, add it from the Add tab.</p>
           ${state.skipped.map((m) => `<div class="skipped"><small>${esc(m.reason)}${m.date ? " · " + esc(shortDate(m.date)) : ""}</small><p>${esc(m.body)}</p></div>`).join("")}
           <button class="btn small outline" type="button" id="x-clear-skipped">Clear list</button>
         </div>

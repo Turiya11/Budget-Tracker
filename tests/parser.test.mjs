@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseSms, splitMessages } from "../js/parser.js";
+import { isOtp, parseSms, splitMessages } from "../js/parser.js";
 import { categorize } from "../js/categories.js";
 
 const cases = [
@@ -79,13 +79,23 @@ const ignored = [
   "Rs 2,000 will be debited from your A/c XX12 on 20-11-26 towards SIP mandate.",
   "Rahul has requested money from you on Google Pay. Rs 300",
   "Txn of Rs 450 failed due to insufficient balance. -SBI",
-  "Your Airtel bill of Rs 499 is due on 20 Nov."
+  "Your Airtel bill of Rs 499 is due on 20 Nov.",
+  "OTP is 482913 to pay Rs 1,299.00 to MYNTRA using your ICICI Bank Credit Card XX1234. Valid for 10 mins.",
+  "Use OTP 7781 to confirm UPI payment of Rs 650 debited... do not share. -Kotak",
+  "Your one time password for sending Rs 5,000 to RAHUL via IMPS is 559012. -SBI"
 ];
 for (const sms of ignored) {
   test("ignores: " + sms.slice(0, 30), () => {
     assert.equal(parseSms(sms).ok, false);
   });
 }
+
+test("real debit alerts with a 'never share your OTP' footer are still logged", () => {
+  const p = parseSms("Rs.349.00 debited from A/c XX1234 to VPA swiggy@icici on 16-11-26. UPI Ref 631234567890. Never share your OTP or PIN with anyone. -IDFC FIRST Bank");
+  assert.equal(p.ok, true);
+  assert.equal(p.amount, 349);
+  assert.equal(isOtp("Sent Rs.20.00 From HDFC Bank A/C *1234 To CHAI On 16/11/26 Ref 631234567891 Not You? Call 18002586161. Do not share OTP"), false);
+});
 
 test("user rule beats built-in", () => {
   const p = parseSms(cases[0].sms);

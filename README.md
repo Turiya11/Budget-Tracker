@@ -33,7 +33,9 @@ App opened ──► bt_pull ──► parse + categorize on the phone ──►
 
 No app can read UPI transactions directly, and RBI's Account Aggregator system is only open to licensed businesses. On an iPhone the bank SMS is the most reliable automatic source, and Shortcuts can act on it in the background.
 
-Security: the tables have row-level security on with no policies, so the public API key can't read or write them. Everything goes through `security definer` functions that check a random 32-character device secret, stored in the database only as a SHA-256 hash.
+Security: the tables have row-level security on with no policies, so the public API key can't read or write them. Everything goes through `security definer` functions that check a random 32-character device secret, stored in the database only as a SHA-256 hash. OTP texts, payment requests, failed payments and reminders are thrown away by `bt_capture` without being saved, and payment SMS are deleted from the inbox once the app has pulled them in. Don't share the *Log bank SMS* shortcut: it contains the secret.
+
+If you set up auto-capture before this change, run `supabase/setup.sql` again to get it (and to clear out any skipped texts the old version kept).
 
 ## Setup (once, about 15 minutes)
 
