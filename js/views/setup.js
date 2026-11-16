@@ -71,8 +71,8 @@ export default {
           <p>In Supabase open <b>Project Settings → API</b> (or <b>Connect</b>). Copy the <b>Project URL</b> and the <b>anon public</b> or <b>publishable</b> key.</p>
           <label class="field"><span>Project URL</span><input class="input" id="s-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://abcdxyz.supabase.co" value="${esc(draft.url)}"></label>
           <label class="field"><span>Anon / publishable key</span><input class="input mono" id="s-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="eyJhbGciOi… or sb_publishable_…" value="${esc(draft.key)}"></label>
-          ${needSecret ? `<label class="field"><span>Device secret from your other phone</span><input class="input mono" id="s-secret" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Shown on the old device under Auto-capture" value=""></label>
-            <p class="hint">This database is already linked to another device. Paste that device's secret to reconnect, or create a new Supabase project.</p>` : ""}
+          ${needSecret ? `<label class="field"><span>Device secret</span><input class="input mono" id="s-secret" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the device secret here" value=""></label>
+            <p class="hint">This database is already linked, either in Safari (if you connected there before adding the app to your Home Screen) or on another phone. Open Auto-capture there, copy the <b>Device secret</b> at the bottom of the page, and paste it here.</p>` : ""}
           <p class="err" id="s-err" role="alert"></p>
           <div class="btnrow">
             <button class="btn small" type="button" id="s-connect" ${busy ? "disabled" : ""}>${icon("link")}${on ? "Reconnect" : "Connect"}</button>
