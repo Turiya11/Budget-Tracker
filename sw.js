@@ -1,11 +1,12 @@
 /* Offline support: network first (always revalidating own files), cache as fallback. */
-const CACHE = "budget-tracker-v1";
+const CACHE = "budget-tracker-v2";
 const SHELL = [
   "./", "./index.html", "./css/app.css", "./manifest.webmanifest", "./icon.svg", "./icon-180.png", "./icon-192.png", "./icon-512.png",
   "./js/main.js", "./js/store.js", "./js/sync.js", "./js/capture.js", "./js/parser.js", "./js/categories.js", "./js/budget.js",
-  "./js/format.js", "./js/icons.js", "./js/ui.js",
+  "./js/format.js", "./js/icons.js", "./js/ui.js", "./js/statement.js",
   "./js/views/common.js", "./js/views/home.js", "./js/views/activity.js", "./js/views/add.js", "./js/views/budget.js",
-  "./js/views/invest.js", "./js/views/settings.js", "./js/views/setup.js", "./js/views/sheets.js"
+  "./js/views/invest.js", "./js/views/settings.js", "./js/views/setup.js", "./js/views/sheets.js",
+  "./js/views/quick.js", "./js/views/paste.js", "./js/views/importer.js"
 ];
 
 self.addEventListener("install", (e) => {

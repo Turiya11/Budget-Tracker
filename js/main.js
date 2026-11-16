@@ -197,8 +197,15 @@ store.subscribe(() => {
   checkAlerts();
 });
 
+let hiddenAt = 0;
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") syncNow({ quiet: true });
+  if (document.visibilityState === "hidden") {
+    hiddenAt = Date.now();
+    return;
+  }
+  // Coming back after a few minutes counts as opening the app.
+  if (store.get().settings.openOnAdd && hiddenAt && Date.now() - hiddenAt > 3 * 60000 && TABS.includes(S.route) && !document.querySelector("#sheet[open]")) go("#add");
+  syncNow({ quiet: true });
 });
 setInterval(() => {
   if (document.visibilityState === "visible") syncNow({ quiet: true });
@@ -206,6 +213,7 @@ setInterval(() => {
 
 /* ---------- boot ---------- */
 $("#hdr-right").dataset.act = "settings";
+if (store.get().settings.openOnAdd && (!location.hash || location.hash === "#home")) history.replaceState(null, "", "#add");
 parseHash();
 render();
 checkAlerts();

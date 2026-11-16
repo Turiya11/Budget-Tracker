@@ -42,8 +42,9 @@ export function catPicker(categories, selected, name = "cat") {
 
 /* ---------- toast ---------- */
 let toastTimer = null;
-export function toast(text, { action, onAction, ms = 4500 } = {}) {
+export function toast(text, { action, onAction, ms = 4500, top = false } = {}) {
   const el = $("#toast");
+  el.classList.toggle("top", top);
   $("#toast-text").textContent = text;
   const btn = $("#toast-btn");
   btn.hidden = !action;

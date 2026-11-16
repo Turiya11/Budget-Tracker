@@ -8,15 +8,19 @@ A personal finance tracker for everyday use in India, built for iPhone. It logs 
 
 | | |
 |---|---|
+| **Quick add** | A big keypad and your usual payees as one-tap chips. Tap *Chai* and the amount and category fill in from last time, then tap Add. Can open straight to this screen. |
+| **Statement import** | Download your statement from your bank as Excel or CSV and import it. Every payment is added and categorized, and anything already logged is left out. Works with HDFC, ICICI, SBI, Axis, Kotak and most other banks. |
 | **Automatic capture** | An iOS Shortcuts automation sends every bank debit/credit SMS to your own Supabase database. The app pulls them in when you open it. |
 | **Categorization** | Recognises 240+ Indian merchants (Swiggy, Zomato, Blinkit, Uber, IRCTC, Amazon, Airtel, Groww…). Change a category once and it remembers that merchant. |
 | **Budgets** | A monthly budget plus optional limits per category, with a daily allowance for the rest of the month. |
 | **Alerts** | A notification on every captured payment that warns you when a category or the whole month crosses your warning level (80% by default) or goes over. Also large-payment and spending-pace alerts. |
 | **Investments** | Record SIPs, stocks, ETFs, gold, FDs, PPF, NPS and savings. Track monthly totals, a monthly goal and current value. Payments to Groww, Zerodha etc. are spotted and offered for recording. |
-| **Manual entry** | Add cash spends, or paste one or more bank SMS to log them in one go. |
+| **Paste SMS** | Paste one or more bank SMS to log them in one go. |
 | **Your data** | Stored on your phone, backed up to your own Supabase project. Export JSON or CSV any time. |
 
 INR throughout, with Indian digit grouping (₹12,34,567).
+
+Auto-capture is optional. Quick add plus a monthly statement import needs no setup at all.
 
 ## How auto-capture works
 
@@ -49,7 +53,7 @@ Plain HTML, CSS and ES modules. There's no build step and no dependencies.
 
 ```bash
 python3 -m http.server 5174   # then open http://localhost:5174
-npm test                      # SMS parser, categorizer and budget tests (Node 18+)
+npm test                      # SMS parser, statement reader, categorizer and budget tests (Node 18+)
 ```
 
 | Path | |
@@ -58,8 +62,10 @@ npm test                      # SMS parser, categorizer and budget tests (Node 1
 | `js/categories.js` | Default categories, merchant rules, categorizer |
 | `js/budget.js` | Budget totals, pace and alert rules |
 | `js/capture.js` | Turns SMS into transactions, de-duplicates |
+| `js/statement.js` | Bank statement reader: finds the columns, cleans up narrations, matches what's already logged |
 | `js/sync.js` | Supabase RPC client |
-| `js/views/` | Screens: home, activity, add, budget, invest, settings, setup |
+| `js/views/` | Screens: home, activity, add (quick add, paste SMS, statement), budget, invest, settings, setup |
+| `vendor/` | [SheetJS](https://sheetjs.com) 0.20.3 for reading Excel files (Apache 2.0), loaded only when you import |
 | `supabase/setup.sql` | Tables and functions for your Supabase project |
 | `tests/` | `node --test` suites |
 

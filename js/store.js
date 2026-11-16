@@ -12,7 +12,8 @@ export function defaults() {
       largeTxn: 2000,
       paceAlert: true,
       notify: true,
-      investGoal: 0
+      investGoal: 0,
+      openOnAdd: false
     },
     sync: { url: "", key: "", secret: "", lastSync: 0, lastError: "", restoredAt: 0 },
     categories: DEFAULT_CATEGORIES.map((c) => ({ ...c })),

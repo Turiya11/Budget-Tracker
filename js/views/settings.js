@@ -33,6 +33,11 @@ export default {
       </button>
 
       <section class="card">
+        <label class="row-field"><span><b>Open on Quick add</b><small>Start the app on the Add screen, so logging a payment takes a couple of taps.</small></span>
+          <span class="switch"><input type="checkbox" id="x-openadd" ${state.settings.openOnAdd ? "checked" : ""}><i></i></span></label>
+      </section>
+
+      <section class="card">
         <h2>Backup & restore</h2>
         <p class="hint">Your data lives on this phone${on ? " and is backed up to your Supabase project after every change" : ""}. Save a file now and then as an extra copy.</p>
         <div class="btnrow">
@@ -71,6 +76,7 @@ export default {
       </section>
       <p class="hint center">Budget Tracker · data stays on your device and your own database.</p>`;
 
+    $("#x-openadd", root).addEventListener("change", (e) => ctx.update((s) => (s.settings.openOnAdd = e.target.checked)));
     $("#x-json", root).addEventListener("click", () => {
       downloadFile(`budget-tracker-backup-${today}.json`, JSON.stringify({ app: "budget-tracker", version: 1, exportedAt: new Date().toISOString(), data: store.exportable() }, null, 2));
       toast("Backup saved");
